@@ -144,6 +144,7 @@ const FavoritesNavigator = () => {
     );
 };
 
+
 const LoginNavigator = () => {
     const Stack = createStackNavigator();
     return (
