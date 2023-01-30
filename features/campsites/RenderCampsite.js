@@ -1,5 +1,12 @@
 import { useRef } from 'react';
-import { StyleSheet, Text, View, PanResponder, Alert } from 'react-native';
+import {
+    StyleSheet,
+    Text,
+    View,
+    PanResponder,
+    Alert,
+    Share
+} from 'react-native';
 import { Card, Icon } from 'react-native-elements';
 import { baseUrl } from '../../shared/baseUrl';
 import * as Animatable from 'react-native-animatable';
@@ -10,7 +17,6 @@ const RenderCampsite = (props) => {
     const view = useRef();
 
     const isLeftSwipe = ({ dx }) => dx < -200;
-
     const isRightSwipe = ({ dx }) => dx > 200;
 
     const panResponder = PanResponder.create({
@@ -27,7 +33,9 @@ const RenderCampsite = (props) => {
             if (isLeftSwipe(gestureState)) {
                 Alert.alert(
                     'Add Favorite',
-                    'Are you sure you wish to add ' + campsite.name + ' to favorites?',
+                    'Are you sure you wish to add ' +
+                    campsite.name +
+                    ' to favorites?',
                     [
                         {
                             text: 'Cancel',
@@ -36,19 +44,32 @@ const RenderCampsite = (props) => {
                         },
                         {
                             text: 'OK',
-                            onPress: () => props.isFavorite
-                                ? console.log('Already set as a favorite.')
-                                : props.markFavorite()
+                            onPress: () =>
+                                props.isFavorite
+                                    ? console.log('Already set as a favorite')
+                                    : props.markFavorite()
                         }
                     ],
                     { cancelable: false }
                 );
-            }
-            else if (isRightSwipe(gestureState)) {
+            } else if (isRightSwipe(gestureState)) {
                 props.onShowModal();
             }
         }
-    })
+    });
+
+    const shareCampsite = (title, message, url) => {
+        Share.share(
+            {
+                title,
+                message: `${title}: ${message} ${url}`,
+                url
+            },
+            {
+                dialogTitle: 'Share ' + title
+            }
+        );
+    };
 
     if (campsite) {
         return (
@@ -62,11 +83,7 @@ const RenderCampsite = (props) => {
                 <Card containerStyle={styles.cardContainer}>
                     <Card.Image source={{ uri: baseUrl + campsite.image }}>
                         <View style={{ justifyContent: 'center', flex: 1 }}>
-                            <Text
-                                style={styles.cardText}
-                            >
-                                {campsite.name}
-                            </Text>
+                            <Text style={styles.cardText}>{campsite.name}</Text>
                         </View>
                     </Card.Image>
                     <Text style={{ margin: 20 }}>{campsite.description}</Text>
@@ -89,7 +106,21 @@ const RenderCampsite = (props) => {
                             color='#5637DD'
                             raised
                             reverse
-                            onPress={() => props.onShowModal()}
+                            onPress={props.onShowModal}
+                        />
+                        <Icon
+                            name='share'
+                            type='font-awesome'
+                            color='#5637DD'
+                            raised
+                            reverse
+                            onPress={() =>
+                                shareCampsite(
+                                    campsite.name,
+                                    campsite.description,
+                                    baseUrl + campsite.image
+                                )
+                            }
                         />
                     </View>
                 </Card>
@@ -113,9 +144,9 @@ const styles = StyleSheet.create({
         margin: 20
     },
     cardText: {
-        textShadowColor: 'rgba(0,0,0,1)',
+        textShadowColor: 'rgba(0, 0, 0, 1)',
         textShadowOffset: { width: -1, height: 1 },
-        textShadowRaduis: 20,
+        textShadowRadius: 20,
         textAlign: 'center',
         color: 'white',
         fontSize: 20
